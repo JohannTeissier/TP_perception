@@ -1,0 +1,52 @@
+function [preparation,RGB] = image_prete(sequence,image)
+image_RGB = imread(fullfile(strcat('TP_Perception01-main/sequence_0',sequence,'/frames'),strcat('00',image,'.bmp')));
+
+% Convertir l'image du modèle RGB au modèle HSV
+image_HSV = rgb2hsv(image_RGB);
+
+image_HSV(:,:,3) = zeros(1080,1920);
+image_HSV(:,:,2) = zeros(1080,1920);
+
+[lig,col] = size(image_HSV(:,:,1));
+
+for i=1:lig
+    for m=1:col
+        if (0.050 < image_HSV(i,m,1) && image_HSV(i,m,1) < 0.150)
+            image_HSV(i,m,:) = 255;
+        else
+            image_HSV(i,m,:) = 0;   
+        end
+    end
+end 
+
+
+se_o = strel('disk',5);
+
+% Appliquer l'ouverture
+image_ouverte = imopen(image_HSV, se_o);
+
+se_f = strel('disk', 7); % 5 est la taille du disque, ajustez selon vos besoins
+
+% Appliquer la fermeture
+image_fermee = imclose(image_ouverte, se_f);
+
+se_o = strel('disk',10);
+
+% Appliquer l'ouverture
+image_ouverte = imopen(image_fermee, se_o);
+
+se_f = strel('disk', 12);
+image_fermee = imclose(image_ouverte, se_f);
+
+image_morpho = image_fermee;
+
+% figure(3);
+% imshow(image_fermee);
+
+J = rgb2gray(image_morpho);
+
+[mag,dir] = imgradient(J,'prewitt');
+
+preparation = mag;
+RGB = image_RGB;
+end

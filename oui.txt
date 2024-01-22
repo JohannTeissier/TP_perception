@@ -1,0 +1,42 @@
+numero_image = '64';
+numero_sequence = '1';
+[mag,image_RGB] = image_prete(numero_sequence,numero_image);
+
+imshow(image_RGB);
+f=true;
+if f==false
+vote = hough(mag);
+else
+r = R;
+R = 0;
+    for i=10*X-r:10*X+r
+        for j=10*Y-r:10*Y+r
+            if mag(i,j)~=0
+                for x0=10:10:round(X+r,-1)
+                    for y0=10:10:round(Y+r,-1)
+                        R = round(sqrt((i-x0)^2 + (j-y0)^2));
+                        if R<500
+                            vote(x0/10,y0/10,R+1) = vote(x0/10,y0/10,R+1)+1;
+                        end
+                    end
+                end
+            end
+        end
+    end  
+end
+f = true;
+
+         
+    
+hold on;
+
+[maxValue, linearIndex] = max(vote(:));
+
+[X,Y,R] = ind2sub(size(vote),linearIndex);
+
+% Utiliser la fonction imfindcircles pour détecter les cercles
+% [centres, rayons] = imfindcircles(mag, [rayon_min, rayon_max],'ObjectPolarity','bright');
+
+% Afficher les cercles détectés
+viscircles([10*X,10*Y], R, 'EdgeColor', 'b');
+hold off;

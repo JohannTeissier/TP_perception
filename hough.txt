@@ -1,0 +1,20 @@
+function [sortie] = hough(image)
+
+vote = zeros(1920/10,1080/10,500);
+
+for i=1:1920
+    for j=1:1080
+        if image(j,i) ~=0
+            for x0=10:10:round(1920,-1)
+                for y0=10:10:round(1080,-1)
+                    R = round(sqrt((i-x0)^2 + (j-y0)^2));
+                    if R<500
+                        vote(x0/10,y0/10,R+1) = vote(x0/10,y0/10,R+1)+1;
+                    end
+                end
+            end
+        end
+    end
+end
+sortie = vote;
+end
