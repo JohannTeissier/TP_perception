@@ -7,7 +7,7 @@ from math import sqrt
 image = cv2.imread("sequence_02/frames/0001.bmp")'''
 
 # Charger la vidéo
-video_path = "sequence_01/seq1.mkv"
+video_path = "sequence_02/seq2.mkv"
 cap = cv2.VideoCapture(video_path)
 
 # Vérifier si la vidéo est ouverte correctement
@@ -85,8 +85,8 @@ except BreakLoop:
 while True:
 
     # Showing images
-    cv2.circle(hsv, (10*x, 10*y), r, (255, 0, 0), 2)
-    cv2.imshow("image", hsv)
+    cv2.circle(image, (10*x, 10*y), r, (255, 0, 0), 2)
+    cv2.imshow("image", image)
 
     # Lire une nouvelle image
     ret, image = cap.read()
@@ -97,60 +97,60 @@ while True:
         break
 
     #Define the new area to analyze
-    if(10*x - R > 0) :
-        bornx_inf = 10*x - R
+    if(10*x - (r+40) > 0) :
+        bornx_inf = 10*x - (r+40)
     else :
         bornx_inf = 0
 
-    if(10*x + R < width) :
-        bornx_supp = 10*x + R
+    if(10*x + (r+40) < width) :
+        bornx_supp = 10*x + (r+40)
     else :
         bornx_supp = width
 
-    if(10*y - R > 0) :
-        borny_inf = 10*y - R
+    if(10*y - (r+40) > 0) :
+        borny_inf = 10*y - (r+40)
     else :
         borny_inf = 0
 
-    if(10*y + R < height) :
-        borny_supp = 10*y + R
+    if(10*y + (r+40) < height) :
+        borny_supp = 10*y + (r+40)
     else :
         borny_supp = height
 
     #-----------------------------------#
 
-    if(10*x - 20 > 0) :
-        centerx_inf = 10*x - 20
+    if(10*x - 40 > 0) :
+        centerx_inf = 10*x - 40
     else :
         centerx_inf = 0
 
-    if(10*x + 20 < width) :
-        centerx_supp = 10*x + 20
+    if(10*x + 40 < width) :
+        centerx_supp = 10*x + 40
     else :
         centerx_supp = width
 
-    if(10*y - 20 > 0) :
-        centery_inf = 10*y - 20
+    if(10*y - 40 > 0) :
+        centery_inf = 10*y - 40
     else :
         centery_inf = 0
 
-    if(10*y + 20 < height) :
-        centery_supp = 10*y + 20
+    if(10*y + 40 < height) :
+        centery_supp = 10*y + 40
     else :
         centery_supp = height
 
-    if r - 20 > 0 :
-        ray_inf = r - 20
+    if r - 40 > 0 :
+        ray_inf = r - 40
     else :
         ray_inf = r 
-    if r + 20 < R :
-        ray_supp = r + 20
+    if r + 40 < R :
+        ray_supp = r + 40
     else :
-        ray_supp = r
+        ray_supp = R
 
-    
+    #hsv = image[bornx_inf : bornx_supp, borny_inf : borny_supp, :]
     # Converting BGR to HSV
-    hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+    hsv[borny_inf : borny_supp, bornx_inf : bornx_supp, :] = cv2.cvtColor(image[borny_inf : borny_supp, bornx_inf : bornx_supp, :], cv2.COLOR_BGR2HSV)
 
     #height, width = image.shape[:2]
 
@@ -172,19 +172,19 @@ while True:
     
     # Apply an opening operation
     kernel = np.ones((10, 10), np.uint8)
-    hsv = cv2.morphologyEx(hsv, cv2.MORPH_OPEN, kernel)
+    hsv[borny_inf : borny_supp, bornx_inf : bornx_supp, :] = cv2.morphologyEx(hsv[borny_inf : borny_supp, bornx_inf : bornx_supp, :], cv2.MORPH_OPEN, kernel)
 
     # Apply a closing operation
     #kernel = np.ones((10, 10), np.uint8)
-    hsv = cv2.morphologyEx(hsv, cv2.MORPH_CLOSE, kernel)
+    hsv[borny_inf : borny_supp, bornx_inf : bornx_supp, :] = cv2.morphologyEx(hsv[borny_inf : borny_supp, bornx_inf : bornx_supp, :], cv2.MORPH_CLOSE, kernel)
 
-    hsv = sobel(hsv)
+    hsv[borny_inf : borny_supp, bornx_inf : bornx_supp, :] = sobel(hsv[borny_inf : borny_supp, bornx_inf : bornx_supp, :])
 
-    vote = np.zeros((int(round(height, -1)/10), int(round(width, -1)/10), R))
+    vote = vote * 0#np.zeros((int(round(height, -1)/10), int(round(width, -1)/10), R))
 
     ray = 0
-    for lines in range(borny_inf, borny_supp, 5) :
-        for columns in range(bornx_inf, bornx_supp, 5) :
+    for lines in range(borny_inf, borny_supp, 10) :
+        for columns in range(bornx_inf, bornx_supp, 10) :
             if hsv[lines, columns, 0] != 0 :
                 for x0 in range(centerx_inf, centerx_supp) :
                     for y0 in range(centery_inf, centery_supp) :
